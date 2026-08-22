@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fundoonotes.dto.NoteRequest;
 import com.fundoonotes.dto.NoteResponse;
+import com.fundoonotes.dto.ReminderRequest;
 import com.fundoonotes.service.NoteService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -102,5 +103,22 @@ public class NoteController {
 			@RequestParam(required = false) String labelName,
 			Principal principal) {
 		return ResponseEntity.ok(noteService.searchNotes(titleText, state, labelName, principal.getName()));
+	}
+
+	@PostMapping("/addUpdateReminderNotes")
+	public ResponseEntity<NoteResponse> addUpdateReminder(@Valid @RequestBody ReminderRequest request,
+			Principal principal) {
+		return ResponseEntity.ok(noteService.addUpdateReminder(request, principal.getName()));
+	}
+
+	@PostMapping("/removeReminderNotes")
+	public ResponseEntity<NoteResponse> removeReminder(@Valid @RequestBody ReminderRequest request,
+			Principal principal) {
+		return ResponseEntity.ok(noteService.removeReminder(request, principal.getName()));
+	}
+
+	@GetMapping("/getReminderNotesList")
+	public ResponseEntity<List<NoteResponse>> getReminderNotes(Principal principal) {
+		return ResponseEntity.ok(noteService.getReminderNotes(principal.getName()));
 	}
 }

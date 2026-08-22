@@ -1,8 +1,13 @@
 package com.fundoonotes.entity;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,6 +35,11 @@ public class Note {
 	private String typeOfNote;
 	private String imageUrl;
 	private String linkUrl;
+
+	@ElementCollection
+	@CollectionTable(name = "note_reminder_list", joinColumns = @JoinColumn(name = "note_id"))
+	@Column(name = "reminder")
+	private List<String> reminders = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
@@ -119,6 +129,14 @@ public class Note {
 
 	public void setLinkUrl(String linkUrl) {
 		this.linkUrl = linkUrl;
+	}
+
+	public List<String> getReminders() {
+		return reminders;
+	}
+
+	public void setReminders(List<String> reminders) {
+		this.reminders = reminders;
 	}
 
 	public User getOwner() {

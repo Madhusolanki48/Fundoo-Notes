@@ -18,6 +18,7 @@ public class NoteResponse {
 	private String imageUrl;
 	private String linkUrl;
 	private List<String> labels;
+	private List<String> reminders;
 
 	public NoteResponse(Note note) {
 		this.noteId = note.getNoteId();
@@ -30,6 +31,7 @@ public class NoteResponse {
 		this.typeOfNote = note.getTypeOfNote();
 		this.imageUrl = note.getImageUrl();
 		this.linkUrl = note.getLinkUrl();
+		this.reminders = note.getReminders();
 		this.labels = note.getLabels().stream()
 				.filter(label -> !label.getIsDeleted())
 				.map(NoteLabel::getLabel)
@@ -78,5 +80,9 @@ public class NoteResponse {
 
 	public List<String> getLabels() {
 		return labels;
+	}
+
+	public List<String> getReminders() {
+		return reminders;
 	}
 }

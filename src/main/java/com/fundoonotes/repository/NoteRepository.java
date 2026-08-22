@@ -16,6 +16,8 @@ public interface NoteRepository extends JpaRepository<Note, Integer>, JpaSpecifi
 
 	List<Note> findByOwnerAndIsDeletedTrue(User owner);
 
+	List<Note> findByOwnerAndIsDeletedFalseAndRemindersIsNotEmpty(User owner);
+
 	List<Note> findByOwnerAndLabelsLabelIgnoreCaseAndIsDeletedFalse(User owner, String label);
 
 	Optional<Note> findByNoteIdAndOwner(int noteId, User owner);

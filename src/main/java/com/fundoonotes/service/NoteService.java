@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fundoonotes.dto.NoteRequest;
 import com.fundoonotes.dto.NoteResponse;
+import com.fundoonotes.dto.ReminderRequest;
 import com.fundoonotes.entity.Note;
 import com.fundoonotes.entity.NoteLabel;
 import com.fundoonotes.entity.User;
@@ -22,12 +23,14 @@ public class NoteService {
 	private final NoteRepository noteRepository;
 	private final UserRepository userRepository;
 	private final NoteLabelRepository noteLabelRepository;
+	private final ReminderMessageService reminderMessageService;
 
 	public NoteService(NoteRepository noteRepository, UserRepository userRepository,
-			NoteLabelRepository noteLabelRepository) {
+			NoteLabelRepository noteLabelRepository, ReminderMessageService reminderMessageService) {
 		this.noteRepository = noteRepository;
 		this.userRepository = userRepository;
 		this.noteLabelRepository = noteLabelRepository;
+		this.reminderMessageService = reminderMessageService;
 	}
 
 	public NoteResponse addNote(NoteRequest request, String email) {
@@ -158,6 +161,34 @@ public class NoteService {
 	public List<NoteResponse> searchNotes(String titleText, String state, String labelName, String email) {
 		User user = getUser(email);
 		return noteRepository.findAll(NoteSpecification.search(user, titleText, state, labelName))
+				.stream()
+				.map(NoteResponse::new)
+				.toList();
+	}
+
+	public NoteResponse addUpdateReminder(ReminderRequest request, String email) {
+		Note note = getNoteForUser(request.getNoteId(), email);
+
+		if (note.getIsDeleted()) {
+			throw new InvalidNoteStateException("Cannot add reminder to a trashed note");
+		}
+
+		note.setReminders(request.getReminder());
+		Note savedNote = noteRepository.save(note);
+		reminderMessageService.sendReminderMessage(savedNote.getNoteId(), savedNote.getReminders());
+
+		return new NoteResponse(savedNote);
+	}
+
+	public NoteResponse removeReminder(ReminderRequest request, String email) {
+		Note note = getNoteForUser(request.getNoteId(), email);
+		note.getReminders().removeAll(request.getReminder());
+		return new NoteResponse(noteRepository.save(note));
+	}
+
+	public List<NoteResponse> getReminderNotes(String email) {
+		User user = getUser(email);
+		return noteRepository.findByOwnerAndIsDeletedFalseAndRemindersIsNotEmpty(user)
 				.stream()
 				.map(NoteResponse::new)
 				.toList();
