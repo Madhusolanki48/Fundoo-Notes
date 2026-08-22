@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -76,5 +77,30 @@ public class NoteController {
 	@GetMapping("/getTrashNotesList")
 	public ResponseEntity<List<NoteResponse>> getTrashNotes(Principal principal) {
 		return ResponseEntity.ok(noteService.getTrashNotes(principal.getName()));
+	}
+
+	@PostMapping("/{noteId}/addLabelToNotes/{labelId}/add")
+	public ResponseEntity<NoteResponse> addLabelToNote(@PathVariable int noteId,
+			@PathVariable int labelId, Principal principal) {
+		return ResponseEntity.ok(noteService.addLabelToNote(noteId, labelId, principal.getName()));
+	}
+
+	@PostMapping("/{noteId}/addLabelToNotes/{labelId}/remove")
+	public ResponseEntity<NoteResponse> removeLabelFromNote(@PathVariable int noteId,
+			@PathVariable int labelId, Principal principal) {
+		return ResponseEntity.ok(noteService.removeLabelFromNote(noteId, labelId, principal.getName()));
+	}
+
+	@GetMapping("/getNotesListByLabel/{labelName}")
+	public ResponseEntity<List<NoteResponse>> getNotesByLabel(@PathVariable String labelName, Principal principal) {
+		return ResponseEntity.ok(noteService.getNotesByLabel(labelName, principal.getName()));
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<NoteResponse>> searchNotes(@RequestParam(required = false) String titleText,
+			@RequestParam(required = false) String state,
+			@RequestParam(required = false) String labelName,
+			Principal principal) {
+		return ResponseEntity.ok(noteService.searchNotes(titleText, state, labelName, principal.getName()));
 	}
 }

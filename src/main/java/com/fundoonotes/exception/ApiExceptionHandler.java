@@ -33,6 +33,16 @@ public class ApiExceptionHandler {
 		return error(ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 
+	@ExceptionHandler(LabelAlreadyExistsException.class)
+	public ResponseEntity<Map<String, String>> handleLabelAlreadyExists(LabelAlreadyExistsException ex) {
+		return error(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(LabelNotFoundException.class)
+	public ResponseEntity<Map<String, String>> handleLabelNotFound(LabelNotFoundException ex) {
+		return error(ex.getMessage(), HttpStatus.NOT_FOUND);
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();

@@ -1,10 +1,15 @@
 package com.fundoonotes.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -29,6 +34,12 @@ public class Note {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User owner;
+
+	@ManyToMany
+	@JoinTable(name = "note_note_labels",
+			joinColumns = @JoinColumn(name = "note_id"),
+			inverseJoinColumns = @JoinColumn(name = "label_id"))
+	private Set<NoteLabel> labels = new HashSet<>();
 
 	public int getNoteId() {
 		return noteId;
@@ -116,5 +127,13 @@ public class Note {
 
 	public void setOwner(User owner) {
 		this.owner = owner;
+	}
+
+	public Set<NoteLabel> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(Set<NoteLabel> labels) {
+		this.labels = labels;
 	}
 }

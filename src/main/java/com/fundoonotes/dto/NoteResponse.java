@@ -1,6 +1,9 @@
 package com.fundoonotes.dto;
 
+import java.util.List;
+
 import com.fundoonotes.entity.Note;
+import com.fundoonotes.entity.NoteLabel;
 
 public class NoteResponse {
 
@@ -14,6 +17,7 @@ public class NoteResponse {
 	private String typeOfNote;
 	private String imageUrl;
 	private String linkUrl;
+	private List<String> labels;
 
 	public NoteResponse(Note note) {
 		this.noteId = note.getNoteId();
@@ -26,6 +30,10 @@ public class NoteResponse {
 		this.typeOfNote = note.getTypeOfNote();
 		this.imageUrl = note.getImageUrl();
 		this.linkUrl = note.getLinkUrl();
+		this.labels = note.getLabels().stream()
+				.filter(label -> !label.getIsDeleted())
+				.map(NoteLabel::getLabel)
+				.toList();
 	}
 
 	public int getNoteId() {
@@ -66,5 +74,9 @@ public class NoteResponse {
 
 	public String getLinkUrl() {
 		return linkUrl;
+	}
+
+	public List<String> getLabels() {
+		return labels;
 	}
 }

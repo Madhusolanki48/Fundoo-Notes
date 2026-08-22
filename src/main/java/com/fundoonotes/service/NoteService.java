@@ -5,10 +5,14 @@ import java.util.List;
 import com.fundoonotes.dto.NoteRequest;
 import com.fundoonotes.dto.NoteResponse;
 import com.fundoonotes.entity.Note;
+import com.fundoonotes.entity.NoteLabel;
 import com.fundoonotes.entity.User;
 import com.fundoonotes.exception.InvalidNoteStateException;
+import com.fundoonotes.exception.LabelNotFoundException;
 import com.fundoonotes.exception.NoteNotFoundException;
+import com.fundoonotes.repository.NoteLabelRepository;
 import com.fundoonotes.repository.NoteRepository;
+import com.fundoonotes.repository.NoteSpecification;
 import com.fundoonotes.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +21,13 @@ public class NoteService {
 
 	private final NoteRepository noteRepository;
 	private final UserRepository userRepository;
+	private final NoteLabelRepository noteLabelRepository;
 
-	public NoteService(NoteRepository noteRepository, UserRepository userRepository) {
+	public NoteService(NoteRepository noteRepository, UserRepository userRepository,
+			NoteLabelRepository noteLabelRepository) {
 		this.noteRepository = noteRepository;
 		this.userRepository = userRepository;
+		this.noteLabelRepository = noteLabelRepository;
 	}
 
 	public NoteResponse addNote(NoteRequest request, String email) {
@@ -118,6 +125,44 @@ public class NoteService {
 				.toList();
 	}
 
+	public NoteResponse addLabelToNote(int noteId, int labelId, String email) {
+		User user = getUser(email);
+		Note note = getNoteForUser(noteId, email);
+		NoteLabel label = getLabelForUser(labelId, user);
+
+		if (label.getIsDeleted()) {
+			throw new LabelNotFoundException("Label not found");
+		}
+
+		note.getLabels().add(label);
+		return new NoteResponse(noteRepository.save(note));
+	}
+
+	public NoteResponse removeLabelFromNote(int noteId, int labelId, String email) {
+		User user = getUser(email);
+		Note note = getNoteForUser(noteId, email);
+		NoteLabel label = getLabelForUser(labelId, user);
+
+		note.getLabels().remove(label);
+		return new NoteResponse(noteRepository.save(note));
+	}
+
+	public List<NoteResponse> getNotesByLabel(String labelName, String email) {
+		User user = getUser(email);
+		return noteRepository.findByOwnerAndLabelsLabelIgnoreCaseAndIsDeletedFalse(user, labelName)
+				.stream()
+				.map(NoteResponse::new)
+				.toList();
+	}
+
+	public List<NoteResponse> searchNotes(String titleText, String state, String labelName, String email) {
+		User user = getUser(email);
+		return noteRepository.findAll(NoteSpecification.search(user, titleText, state, labelName))
+				.stream()
+				.map(NoteResponse::new)
+				.toList();
+	}
+
 	private void copyRequestToNote(NoteRequest request, Note note) {
 		note.setTitle(request.getTitle());
 		note.setDescription(request.getDescription());
@@ -136,5 +181,10 @@ public class NoteService {
 	private User getUser(String email) {
 		return userRepository.findByEmail(email)
 				.orElseThrow(() -> new NoteNotFoundException("User not found"));
+	}
+
+	private NoteLabel getLabelForUser(int labelId, User user) {
+		return noteLabelRepository.findByIdAndOwner(labelId, user)
+				.orElseThrow(() -> new LabelNotFoundException("Label not found"));
 	}
 }
