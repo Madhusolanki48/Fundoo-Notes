@@ -23,6 +23,16 @@ public class ApiExceptionHandler {
 		return error(ex.getMessage(), HttpStatus.UNAUTHORIZED);
 	}
 
+	@ExceptionHandler(NoteNotFoundException.class)
+	public ResponseEntity<Map<String, String>> handleNoteNotFound(NoteNotFoundException ex) {
+		return error(ex.getMessage(), HttpStatus.NOT_FOUND);
+	}
+
+	@ExceptionHandler(InvalidNoteStateException.class)
+	public ResponseEntity<Map<String, String>> handleInvalidNoteState(InvalidNoteStateException ex) {
+		return error(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();
